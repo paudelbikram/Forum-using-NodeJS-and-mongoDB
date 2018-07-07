@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<% include ./partials/header %>
+<body>
+<div class="container">
+    <div>
+        <h3 align="center">Welcome to CS-Connect !!!</h3>
+            <ul class="nav nav-tabs justify-content-center">
+                <li class="nav-item">
+                    <a class="nav-link active" href="./signin">Log In</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="./verify">Create Account</a>
+                </li>
+            </ul>
+    </div>
+    <br>
+    <% if (successmessage && successmessage.length > 0){ %>
+        <div class="alert alert-success" role="alert">
+        <%= successmessage %>
+        </div>
+    <% } %>
+    <% if (errormessage && errormessage.length > 0) { %>
+        <div class="alert alert-danger" role="alert">
+            Login Error: <%= errormessage %>
+        </div>
+    <% } %>
+    <form class="border-dark" method="POST" action="/verifylogin" name="signinform" onsubmit="return validatepass()">
+        <div class="form-group row">
+            <label for="colFormLabelLg" class="col-sm-2 offset-sm-2 col-form-label col-form-label-lg">Email</label>
+            <div class="col-sm-6">
+                <input type="email" name="email" class="form-control form-control-lg" id="colFormLabelLg" required>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="colFormLabelLg" class="col-sm-2 offset-sm-2 col-form-label col-form-label-lg">Password</label>
+            <div class="col-sm-6">
+                <input type="password" class="form-control form-control-lg" id="inputPassword3" name="password" required>
+            </div>   
+        </div>
+        <div class ="col-sm-6 offset-sm-4">
+                <p  id='passerror'></p>                   
+        </div>
+        <p align="center">It's free, create an account <a href="/verify">here</a></p>
+        <div class="form-group row">
+            <div class="col-sm-6 offset-sm-2">
+                <button type="submit" class="btn btn-primary btn-lg">Log In</button>
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            </div>
+        </div>
+    </form>
+</div>
+        
+<script>
+    function validatepass(){
+        const pass = document.forms["signinform"]["password"].value;
+        if(pass.length>5){
+            return true;
+        }else{
+            document.getElementById("passerror").className="alert alert-danger";
+            let errorMessage = document.getElementById("passerror");
+            let message =document.createTextNode("Invalid password");
+            errorMessage.appendChild(message);
+            return false;
+        }
+    }
+</script>   
+        
+
+<% include ./partials/footer %>
+<% include ./partials/scripts %>
+</body>
+
+</html>

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+    <style>
+        .custom-file-upload {
+            border: 1px solid #ccc;
+            display: inline-block;
+            padding: 6px 12px;
+            cursor: pointer;
+        }
+        form img {
+            height: 64px;
+            order: 1;
+        }
+
+        #defaultimage{
+            font-size: 3.5em;
+
+        }
+        #defaultimagenavbar{
+            font-size: 1.5em;
+
+        }
+    </style>
+    <% include ./partials/header %>
+
+    <body>
+        <div class="container">
+            <nav class="navbar fixed-top navbar-expand-lg navbar-light" style="background-color:#466995;">
+                <a class="navbar-brand mb-0 h1" href="#"><h4>CS-Connect</h4></a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+                </button>
+                  
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav mr-auto">
+                        <li class="nav-item active">
+                            <a class="nav-link" href="./userhome"><h4><i class="fa fa-home" aria-hidden="true"></i></h4><span class="sr-only">(current)</span></a>
+                        </li>
+                        <li class="nav-item">
+                            <form action='/search' method='Get' class="form-inline my-2 my-lg-0">
+                                <!-- <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search"> -->
+                                <input class="form-control mr-sm-2" name="searchstring" type="text" placeholder="Search for a post here" aria-label="Search" size="95" required>
+                                <button style="margin-right: 30px;" class="btn btn-outline-success my-2 my-sm-0" type="submit"><i class="fa fa-search" aria-hidden="true"></i></button>
+                            </form>
+                        </li>
+                    
+                        <li class="nav-item dropdown">
+                            <h4>
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        
+                                <!-- <i class="fa fa-user" aria-hidden="true"></i> -->
+                                <small style="font-size:16px">
+                                    <% if(user.image){ %>
+                                        <img src ="<%= user.image %>" width="37" height="auto">
+                                    <% }else{ %>
+                                        <i id="defaultimagenavbar" class="fa fa-user" aria-hidden="true"></i>
+                                    <% } %>       
+                                    <% if(user.firstname && user.lastname){ %>                                  
+                                        <%= user.firstname %> <%= user.lastname %>
+                                                                        
+                                    <% } %>
+                                </small>
+                                </a>
+                                <div class="dropdown-menu" style="background-color:#466995;" aria-labelledby="navbarDropdown">
+                                    <a class="dropdown-item" href="./myprofile">My Profile</a>
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item" href="./logout">Log Out</a>
+                                </div>
+                            </h4>
+                        </li>
+                    </ul>
+                     
+                </div>
+            </nav>
+            <br><br><br><br>
+            <form class="border-dark" action="/updateuser?_csrf=<%= csrfToken %>" method="POST" enctype="multipart/form-data">
+                <div class="form-group row">
+                    <label for="colFormLabelLg" class="col-sm-2 offset-sm-2 col-form-label col-form-label-lg">Email</label>
+                    <div class="col-sm-6">
+                        <input type="email" class="form-control form-control-lg" name="email" value="<%= user.email %>" readonly>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="colFormLableLg" class="col-sm-2 offset-sm-2 col-form-label col-form-label-lg">First Name</label>
+                    <div class="col-sm-2">
+                        <input type="text" class="form-control form-control-lg" name="firstname" value="<%= user.firstname %>">
+                    </div>
+                    <label for="colFormLableLg" class="col-sm-2 col-form-label col-form-label-lg">Last Name</label>
+                    <div class="col-sm-2">
+                        <input type="text" class="form-control form-control-lg" name="lastname" value="<%= user.lastname %>" >
+                        <input type="hidden" class="form-control form-control-lg" name="filename" value="<%= user.image %>" >
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                        
+                    <label for="colFormLableLg" class="col-sm-2 offset-sm-2 col-form-label col-form-label-lg">Current Picture</label>
+                    <div class="col-sm-8">
+                        <% if(user.image){ %>
+                            <img src ="<%= user.image %>">
+                        <% }else{ %>
+                        <h1>
+                            <i id="defaultimage" class="fa fa-user" aria-hidden="true"></i>
+                        </h1>
+                        
+                        <% } %>
+                    </div>
+                    <br><br>
+                </div>
+                <div class="form-group row">
+                    <label for="colFormLableLg" class="col-sm-2 offset-sm-2 col-form-label col-form-label-lg">Upload a new picture</label>
+                    <div class="col-sm-8">
+                        <label for ="file-upload" class='custom-file-upload'>
+                            <i class="fa fa-upload"></i>Upload Profile Picture
+                        </label>
+                        <input id ="file-upload"  name="imageUpload" class="form-control" type="file" accept=".jpg,.jpeg, .png" size="1">
+                    </div>
+                    <div class="offset-sm-4">
+                        <div class="preview">
+                            <p id ="filemessage" style="padding-left: 12px;">No file currently selected for upload.</p>
+                        </div>
+                    </div>       
+                </div>
+
+                <div class="form-group row">
+                    <div class="col-sm-6 offset-sm-2">
+                        <button type="submit" id="submit" class="btn btn-primary btn-lg">Update</button>
+                    </div>
+                </div>
+            </form>
+           
+        </div>
+        
+        <script>
+            'use strict'
+            //I burrowed the majority of this script from https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/file
+            //and modified to meet my need
+            let input = document.querySelector('#file-upload');
+            input.style.opacity = 0;
+            let preview = document.querySelector('.preview');
+
+            input.addEventListener('change', updateImageDisplay);
+            function updateImageDisplay() {
+                while(preview.firstChild) {
+                    preview.removeChild(preview.firstChild);
+                }
+
+                let curFiles = input.files;
+                if(curFiles.length === 0) {
+                    let para = document.createElement('p');
+                    para.textContent = 'No file currently selected for upload.';
+                    para.style="padding-left: 12px";
+                    //para.style.color="Red";
+                    preview.appendChild(para);
+                } else {
+                    let list = document.createElement('ul');
+                    preview.appendChild(list);
+                    for(let i = 0; i < curFiles.length; i++) {
+                    let listItem = document.createElement('li');
+                    let para = document.createElement('p');
+                    if(validFileType(curFiles[i])) {
+                        para.textContent = 'File name ' + curFiles[i].name + ', file size ' + returnFileSize(curFiles[i].size) + '.';
+                        let image = document.createElement('img');
+                        image.src = window.URL.createObjectURL(curFiles[i]);
+
+                        listItem.appendChild(image);
+                        listItem.appendChild(para);
+
+                    } else {
+                        para.textContent = 'File name ' + curFiles[i].name + ': Not a valid file type. Update your selection.';
+                        listItem.appendChild(para);
+                    }
+
+                    list.appendChild(listItem);
+                }
+            }
+            }let fileTypes = [
+            'image/jpeg',
+            'image/pjpeg',
+            'image/png'
+            ]
+
+            function validFileType(file) {
+                for(let i = 0; i < fileTypes.length; i++) {
+                    if(file.type === fileTypes[i]) {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+            function returnFileSize(number) {
+                if(number < 1024) {
+                    return number + 'bytes';
+                } else if(number > 1024 && number < 1048576) {
+                    return (number/1024).toFixed(1) + 'KB';
+                } else if(number > 1048576) {
+                    return (number/1048576).toFixed(1) + 'MB';
+                }
+            }
+
+            
+        </script>   
+        
+
+    <% include ./partials/footer %>
+    <% include ./partials/scripts %>
+    </body>
+
+</html>

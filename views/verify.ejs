@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<% include ./partials/header %>
+
+<body>
+    <div class="container">
+        <h3 align="center">Welcome to CS-Connect !!!</h3>
+        <ul class="nav nav-tabs justify-content-center">
+            <li class="nav-item">
+                <a class="nav-link" href="./signin">Log In</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="./signup">Create Account</a>
+            </li>
+        </ul>
+        <br>
+        <div id="verificationform">
+            <form class="border-dark" action="/verify" method="POST" name="verifyform">
+                <div class="form-group row">
+                    <label for="colFormLabelLg" class="col-sm-2 offset-sm-2 col-form-label col-form-label-lg">Email</label>
+                    <div class="col-sm-6">
+                        <input type="email" name ="email" class="form-control form-control-lg" required>
+                    </div>    
+                </div>
+                <div class="form-group row">
+                    <div class="col-sm-6 offset-sm-2">
+                        <button type="submit" class="btn btn-primary btn-lg">Get Verification Code</button>
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    </div>
+                </div>
+            </form>
+        </div>
+                
+    </div>
+    <% include ./partials/footer %>
+    <% include ./partials/scripts %>
+    </body>
+
+</html>

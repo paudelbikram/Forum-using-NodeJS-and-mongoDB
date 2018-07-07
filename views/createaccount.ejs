@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+    <style>
+        .custom-file-upload {
+            border: 1px solid #ccc;
+            display: inline-block;
+            padding: 6px 12px;
+            cursor: pointer;
+        }
+        form img {
+            height: 64px;
+            order: 1;
+        }
+                
+    </style>
+    <% include ./partials/header %>
+
+    <body>
+        <div class="container">
+            <div>
+                <h3 align="center">Welcome to CS-Connect !!!</h3>
+                <ul class="nav nav-tabs justify-content-center">
+                    <li class="nav-item">
+                        <a class="nav-link" href="./signin">Log In</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="./signup">Create Account</a>
+                    </li>
+                </ul>
+
+            </div>
+            <br>
+            <% if (messages && messages.length > 0) { %>
+                <div class="alert alert-danger" role="alert">
+                    Sign Up Error: <%= messages %>
+                </div>
+            <% } %>
+        
+            <form class="border-dark" action="/signup" method="POST" name="signupform" onsubmit="return validateinput()">
+                <div class="form-group row">
+                    <label for="colFormLabelLg" class="col-sm-2 offset-sm-2 col-form-label col-form-label-lg">Email</label>
+                    <div class="col-sm-6">
+                        <input type="email" class="form-control form-control-lg" name="email" value="<%= theirEmail %>" readonly>
+                    </div>
+                </div>
+                <!-- Added this div in order to handle first name and last name -->
+                <div class="form-group row">
+                    <label for="colFormLableLg" class="col-sm-2 offset-sm-2 col-form-label col-form-label-lg">First Name</label>
+                    <div class="col-sm-2">
+                        <input type="text" class="form-control form-control-lg" name="firstname" required>
+                    </div>
+                    <label for="colFormLableLg" class="col-sm-2 col-form-label col-form-label-lg">Last Name</label>
+                    <div class="col-sm-2">
+                        <input type="text" class="form-control form-control-lg" name="lastname" required >
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label for="colFormLabelLg" class="col-sm-2 offset-sm-2 col-form-label col-form-label-lg">Password</label>
+                    <div class="col-sm-6">
+                        <input type="password" class="form-control form-control-lg" id="inputPassword3" name="password" required>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="colFormLabelLg" class="col-sm-2 offset-sm-2 col-form-label col-form-label-lg">Confirm Password</label>
+                    <div class="col-sm-6">
+                        <input type="password" class="form-control form-control-lg" id="cfpassword" name="cpassword" required>
+                    </div>
+                </div>
+                <div class ="col-sm-6 offset-sm-4">
+                    <p  id='passerror'></p>                       
+                </div>
+                    
+                <div class="form-group row">
+                    <div class="col-sm-6 offset-sm-2">
+                        <button type="submit" id="submit" class="btn btn-primary btn-lg">Create Account</button>
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    </div>
+                </div>
+            </form>
+           
+        </div>
+        
+        <script>
+            'use strict'
+            
+            let errorMessage = document.getElementById("passerror");
+            errorMessage.innerHTML='';//Reseting error message to nothing.
+            function validateinput(){
+                let fileInput = document.querySelector('#file-upload');
+                const pass = document.forms["signupform"]["password"].value;
+                const cpass = document.forms["signupform"]["cpassword"].value;
+                if(cpass!=pass){ 
+                    document.getElementById("passerror").className="alert alert-danger";
+                    let errorMessage = document.getElementById("passerror");
+                    errorMessage.innerHTML='Password does not match.';
+                    return false;
+                }
+                if(pass.length<5){
+                    document.getElementById("passerror").className="alert alert-danger";
+                    let errorMessage = document.getElementById("passerror");
+                    errorMessage.innerHTML= "Invalid password. Password has to be at least 5 characters long.";
+                    return false;
+                }
+                return true;
+            }  
+        </script>   
+        
+
+    <% include ./partials/footer %>
+    <% include ./partials/scripts %>
+    </body>
+
+</html>

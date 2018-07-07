@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<% include ./partials/header %>
+
+<head>
+    <script type="text/javascript">
+        //Need to have this function in head for changing time with system time, could not make the momentJS work
+        //so end up writing my own function in plain javascript, tested and it works.
+        function converttolocal(dateutc){
+            let appendUTC = dateutc+" UTC";
+            console.log(appendUTC);
+            let date = new Date(appendUTC);
+            console.log(date);
+            let options={
+                weekday:"short", year:"numeric", month:"short",
+                day:"numeric", hour:"2-digit", minute:"2-digit"
+            };
+            document.write(date.toLocaleDateString("en-us",options));                                            
+        }
+    </script>
+    <!-- tinymce rich text editor, had to use this remote file because the npm package has some issue (I could not figure)
+    make a copy of this file from remote and keep it local, they might change the file remotely -->
+    <script src="https://tinymce.cachefly.net/4.0/tinymce.min.js"></script>
+    <script type="application/x-javascript">
+    tinymce.init({
+        selector: '#descriptioninput',
+        setup: function (editor) {
+            editor.on('change', function () {
+                editor.save();
+            });
+        }
+    });
+    </script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Tangerine">
+    <title>CS-Connect</title>
+</head>
+<style>
+  
+    .hide { position:absolute; top:-1px; left:-1px; width:1px; height:1px; }
+
+    #descriptioninput{ overflow:hidden; }
+    #contentinput{ overflow:hidden; }
+    #defaultimage{
+        font-size: 3.5em;
+    }
+    
+    #defaultimagenavbar{
+        font-size: 1.5em;
+
+    }
+     .card-text{ 
+        max-width: 100%; 
+    } 
+    
+    
+</style>
+<body>
+    <div class="container bg-dark">
+        <nav class="navbar fixed-top navbar-expand-lg navbar-light" style="background-color:#466995;">
+            <a class="navbar-brand mb-0 h1" href="#"><h4>CS-Connect</h4></a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+            </button>
+                    
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item active">
+                        <a class="nav-link" href="./userhome"><h4><i class="fa fa-home" aria-hidden="true"></i></h4><span class="sr-only">(current)</span></a>
+                    </li>
+                    <li class="nav-item">
+                        <form action='/search' method='Get' class="form-inline my-2 my-lg-0">
+                            <!-- <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search"> -->
+                            <input class="form-control mr-sm-2" name="searchstring" type="text" placeholder="Search for a post here" aria-label="Search" size="95" required>
+                            <button style="margin-right: 30px;" class="btn btn-outline-success my-2 my-sm-0" type="submit"><i class="fa fa-search" aria-hidden="true"></i></button>
+                        </form>
+                    </li>
+                
+                    <li class="nav-item dropdown">
+                        <h4>
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+
+                            <small style="font-size:16px">
+                                <% if(user.image){ %>
+                                    <img src ="<%= user.image %>" width="37" height="auto">
+                                <% }else{ %>
+                                    <i id="defaultimagenavbar" class="fa fa-user" aria-hidden="true"></i>
+                                <% } %>       
+                                <% if(user.firstname && user.lastname){ %>                                  
+                                    <%= user.firstname %> <%= user.lastname %>
+                                                                    
+                                <% } %>
+                            </small>
+                            </a>
+                            <div class="dropdown-menu" style="background-color:#466995;" aria-labelledby="navbarDropdown">
+                                <a class="dropdown-item" href="./myprofile">My Profile</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="./logout">Log Out</a>
+                            </div>
+                        </h4>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        <br><br>
+        <div class="jumbotron">
+            <form action='/post' method="POST">
+                <label for="exampleFormControlInput1">Title</label>
+                <input type="text" class="form-control" name="title" required>
+                <label for="exampleFormControlTextarea1">Details of your post</label>
+                <textarea class="form-control" id="descriptioninput" name="description" rows="5" required></textarea>
+                <div class="form-group">
+                    <input type="hidden" name="useremail" value="<%= user.email %>">
+                    <input type="hidden" name ="userrole" value="<%= user.role %>">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                </div>
+                <button class="btn btn-primary" type="submit">Post</button>
+                    
+            </form>
+            <br>
+            <div class="post">
+
+            <% for(const post of results.reverse()){ %>
+
+                <div class="col-12">
+                    <div class="card bg-secondary">
+                        <div class="card-header">
+                            <h5 class="card-title text-dark"><b><%= post.title %></b></h5>
+                        </div>
+                        <div class="card-body" style="background-color:#dddd">
+                            <span class="card-title mb-2 text-primary">
+                            <span><small><%= post.author.slice(0,post.author.indexOf('@')) %> posted on
+                            <script>
+                                converttolocal(<%- JSON.stringify(post.date) %>);
+                            </script>
+                            </small></span></span>
+                            <hr>
+                            <div style="height: 100%; overflow: auto;" class="card-text" id="des">
+                                <%- post.description %>
+                            </div>
+                            <div class="card-footer">
+                                <div class="row">
+                                    <div class="col">
+                                        <button class="btn btn-primary" onclick="showHideReply('<%= post._id %>')" ><i class="fa fa-reply" aria-hidden="true"></i></button>
+                                        </form> 
+                                    </div>
+                                    <div class="col">
+                                        <% if(user.role=="admin"){ %>
+                                        <form action="/remove" method='POST'>
+                                            <input type="hidden" name="postid" value="<%= post._id %>">
+                                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                            <button  class="btn btn-danger" type="submit"><i class="fa fa-trash" aria-hidden="true"></i></button>
+                                        </form> 
+                                        <% } %>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="reply" style="display:none;" id="<%= post._id %>">
+
+                        <% for(const comment of post.comments){ %>
+
+                            <div class="col-sm-12">
+                                <div class="card" style="margin-bottom: 2px; background-color:#dddd">
+                                    <div class="card-body">
+                                        <% if(comment.author){ %>
+                                        <b class="text-primary"><%= comment.author.slice(0,comment.author.indexOf('@')) %>:</b>
+                                        <% } %>
+                                        <br>
+                                        <% if(comment.content){ %>
+                                        <%- comment.content %>
+                                        <% } %>
+                                        
+                                    </div>
+                                </div>
+                            </div>
+
+                        <% } %>
+                        <br/>
+
+                        <form name ="replyform" action='/reply' method="POST">
+                            <textarea  style="width: 97%; margin-left:18px; height: 50px"class="replycontent" id="contentinput" name="content" rows="1" cols="95" required></textarea>
+                            <input type="hidden" name="formattedtext" >
+                            <input type="hidden" name ="postid" value="<%= post._id %>">
+                            <input type="hidden" name="useremail" value="<%= user.email %>">
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                            <button style="margin-left:18px; margin-top:5px;"class="btn btn-primary" type="submit">Reply</button>       
+                        </form>
+                        <br/>
+                    </div>
+                                
+                </div>
+            </div>
+            <hr>
+            <% } %>              
+        </div>
+
+        <% include ./partials/footer %>
+        <% include ./partials/scripts %>
+        <script>
+
+            //momentJS not working for me, don't know why, this function is useless
+            function localtime(utctime){
+                let localtime = moment.locale(utctime).format('llll');
+                document.write(localtime);
+            }
+
+            $("#descriptioninput").keyup(function(e) {
+                $(this).height(30);
+                $(this).height(this.scrollHeight + parseFloat($(this).css("borderTopWidth")) + parseFloat($(this).css("borderBottomWidth")));
+            });
+
+            $(".replycontent").keyup(function(e) {
+                $(this).height(30);
+                $(this).height(this.scrollHeight + parseFloat($(this).css("borderTopWidth")) + parseFloat($(this).css("borderBottomWidth")));
+            });
+            $("#contentinput").keyup(function(e) {
+                $(this).height(30);
+                $(this).height(this.scrollHeight + parseFloat($(this).css("borderTopWidth")) + parseFloat($(this).css("borderBottomWidth")));
+            });
+
+            function showHideReply(idname){
+                if (document.getElementById(idname).style.display == "none" ) {
+                document.getElementById(idname).style.display="";
+
+                } else {
+                document.getElementById(idname).style.display="none";
+                }  
+            }
+
+
+        </script>
+</body>
+
+</html>
